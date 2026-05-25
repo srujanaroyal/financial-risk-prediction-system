@@ -1,9 +1,9 @@
 import streamlit as st
 import requests
 
-# =========================
+# ======================================================
 # PAGE CONFIG
-# =========================
+# ======================================================
 
 st.set_page_config(
     page_title="Financial Risk Predictor",
@@ -11,9 +11,9 @@ st.set_page_config(
     layout="wide"
 )
 
-# =========================
+# ======================================================
 # CUSTOM CSS
-# =========================
+# ======================================================
 
 st.markdown("""
 <style>
@@ -22,7 +22,7 @@ st.markdown("""
     background-color: #f5f7fa;
 }
 
-.stButton>button {
+.stButton > button {
     width: 100%;
     background-color: #1f77b4;
     color: white;
@@ -30,18 +30,21 @@ st.markdown("""
     border-radius: 10px;
     height: 50px;
     border: none;
+    font-weight: bold;
 }
 
-.stButton>button:hover {
+.stButton > button:hover {
     background-color: #125d98;
+    color: white;
 }
 
 .result-box {
-    padding: 20px;
-    border-radius: 10px;
+    padding: 25px;
+    border-radius: 15px;
     text-align: center;
     font-size: 24px;
     font-weight: bold;
+    margin-top: 20px;
 }
 
 .low-risk {
@@ -57,115 +60,126 @@ st.markdown("""
 </style>
 """, unsafe_allow_html=True)
 
-# =========================
+# ======================================================
 # TITLE
-# =========================
+# ======================================================
 
 st.title("💰 Financial Risk Prediction System")
 
-st.write("Fill customer financial details below.")
+st.write("Enter customer financial details below to predict risk level.")
 
-# =========================
-# INPUTS
-# =========================
+st.markdown("---")
+
+# ======================================================
+# INPUT FIELDS
+# ======================================================
 
 col1, col2 = st.columns(2)
 
 with col1:
 
-    age = st.number_input("Age", 18, 100, 30)
+    age = st.number_input(
+        "Age",
+        min_value=18,
+        max_value=100,
+        value=30
+    )
 
     annual_income = st.number_input(
         "Annual Income",
-        10000.0,
-        1000000.0,
-        50000.0
+        min_value=10000.0,
+        max_value=1000000.0,
+        value=50000.0
     )
 
     credit_score = st.number_input(
         "Credit Score",
-        300.0,
-        850.0,
-        650.0
+        min_value=300.0,
+        max_value=850.0,
+        value=650.0
     )
 
     loan_amount = st.number_input(
         "Loan Amount",
-        1000.0,
-        1000000.0,
-        20000.0
+        min_value=1000.0,
+        max_value=1000000.0,
+        value=20000.0
     )
 
     interest_rate = st.number_input(
         "Interest Rate (%)",
-        1.0,
-        50.0,
-        10.0
+        min_value=1.0,
+        max_value=50.0,
+        value=10.0
     )
 
     debt_to_income_ratio = st.slider(
         "Debt To Income Ratio",
-        0.0,
-        1.0,
-        0.3
+        min_value=0.0,
+        max_value=1.0,
+        value=0.3
     )
 
     savings_balance = st.number_input(
         "Savings Balance",
-        0.0,
-        1000000.0,
-        10000.0
+        min_value=0.0,
+        max_value=1000000.0,
+        value=10000.0
     )
 
 with col2:
 
     work_experience_years = st.number_input(
-        "Work Experience",
-        0,
-        50,
-        5
+        "Work Experience (Years)",
+        min_value=0,
+        max_value=50,
+        value=5
     )
 
     loan_duration_months = st.number_input(
         "Loan Duration (Months)",
-        1,
-        360,
-        24
+        min_value=1,
+        max_value=360,
+        value=24
     )
 
     monthly_expenses = st.number_input(
         "Monthly Expenses",
-        0.0,
-        100000.0,
-        5000.0
+        min_value=0.0,
+        max_value=100000.0,
+        value=5000.0
     )
 
     employment_stability_years = st.number_input(
-        "Employment Stability",
-        0,
-        50,
-        5
+        "Employment Stability (Years)",
+        min_value=0,
+        max_value=50,
+        value=5
     )
 
     previous_default_count = st.number_input(
         "Previous Defaults",
-        0,
-        20,
-        0
+        min_value=0,
+        max_value=20,
+        value=0
     )
 
     financial_literacy_score = st.slider(
         "Financial Literacy Score",
-        1,
-        100,
-        50
+        min_value=1,
+        max_value=100,
+        value=50
     )
 
-# =========================
-# PREDICT BUTTON
-# =========================
+# ======================================================
+# PREDICTION BUTTON
+# ======================================================
 
 if st.button("Predict Financial Risk"):
+
+    # --------------------------------------------------
+    # CREATE JSON DATA
+    # --------------------------------------------------
 
     data = {
         "age": age,
@@ -194,39 +208,109 @@ if st.button("Predict Financial Risk"):
         "financial_literacy_score": financial_literacy_score
     }
 
+    # --------------------------------------------------
+    # BACKEND API URL
+    # --------------------------------------------------
+
+    API_URL = "https://financial-risk-prediction-system-2.onrender.com/predict"
+
+    # --------------------------------------------------
+    # API REQUEST
+    # --------------------------------------------------
+
     try:
 
-        response = requests.post(
-            "http://127.0.0.1:8000/predict",
-            json=data
-        )
+        with st.spinner("Predicting financial risk..."):
 
-        result = response.json()
-
-        prediction = result["prediction"]
-        confidence = result["confidence"]
+            response = requests.post(
+                API_URL,
+                json=data,
+                timeout=30
+            )
 
         st.markdown("---")
 
-        if prediction == "Low Risk":
+        # --------------------------------------------------
+        # DEBUG INFO
+        # --------------------------------------------------
 
-            st.markdown(f'''
-            <div class="result-box low-risk">
-            ✅ LOW FINANCIAL RISK <br><br>
-            Confidence: {confidence}%
-            </div>
-            ''', unsafe_allow_html=True)
+        st.subheader("Server Status")
+
+        st.write("Status Code:", response.status_code)
+
+        st.subheader("Raw Server Response")
+
+        st.code(response.text)
+
+        # --------------------------------------------------
+        # SUCCESS RESPONSE
+        # --------------------------------------------------
+
+        if response.status_code == 200:
+
+            try:
+
+                result = response.json()
+
+                prediction = result.get("prediction", "Unknown")
+                confidence = result.get("confidence", 0)
+
+                st.subheader("Prediction Result")
+
+                if prediction.lower() == "low risk":
+
+                    st.markdown(f"""
+                    <div class="result-box low-risk">
+                        ✅ LOW FINANCIAL RISK <br><br>
+                        Confidence: {confidence}%
+                    </div>
+                    """, unsafe_allow_html=True)
+
+                else:
+
+                    st.markdown(f"""
+                    <div class="result-box high-risk">
+                        ⚠️ HIGH FINANCIAL RISK <br><br>
+                        Confidence: {confidence}%
+                    </div>
+                    """, unsafe_allow_html=True)
+
+            except Exception as json_error:
+
+                st.error("JSON Decode Error")
+
+                st.write(json_error)
+
+        # --------------------------------------------------
+        # SERVER ERROR
+        # --------------------------------------------------
 
         else:
 
-            st.markdown(f'''
-            <div class="result-box high-risk">
-            ⚠️ HIGH FINANCIAL RISK <br><br>
-            Confidence: {confidence}%
-            </div>
-            ''', unsafe_allow_html=True)
+            st.error(f"Server Error: {response.status_code}")
+
+    # --------------------------------------------------
+    # TIMEOUT ERROR
+    # --------------------------------------------------
+
+    except requests.exceptions.Timeout:
+
+        st.error("Request Timeout. Render backend may be sleeping.")
+
+    # --------------------------------------------------
+    # CONNECTION ERROR
+    # --------------------------------------------------
+
+    except requests.exceptions.ConnectionError:
+
+        st.error("Failed to connect to backend server.")
+
+    # --------------------------------------------------
+    # OTHER ERRORS
+    # --------------------------------------------------
 
     except Exception as e:
 
-        st.error("FastAPI server is not running.")
+        st.error("Unexpected Error Occurred")
+
         st.write(e)
