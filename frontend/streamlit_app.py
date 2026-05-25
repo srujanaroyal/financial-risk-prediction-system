@@ -177,9 +177,9 @@ with col2:
 
 if st.button("Predict Financial Risk"):
 
-    # --------------------------------------------------
-    # CREATE JSON DATA
-    # --------------------------------------------------
+    # ==================================================
+    # CREATE INPUT DATA
+    # ==================================================
 
     data = {
         "age": age,
@@ -208,15 +208,15 @@ if st.button("Predict Financial Risk"):
         "financial_literacy_score": financial_literacy_score
     }
 
-    # --------------------------------------------------
-    # BACKEND API URL
-    # --------------------------------------------------
+    # ==================================================
+    # RENDER BACKEND URL
+    # ==================================================
 
     API_URL = "https://financial-risk-prediction-system-2.onrender.com/predict"
 
-    # --------------------------------------------------
-    # API REQUEST
-    # --------------------------------------------------
+    # ==================================================
+    # SEND REQUEST TO FASTAPI BACKEND
+    # ==================================================
 
     try:
 
@@ -230,84 +230,64 @@ if st.button("Predict Financial Risk"):
 
         st.markdown("---")
 
-        # --------------------------------------------------
-        # DEBUG INFO
-        # --------------------------------------------------
-
-        st.subheader("Server Status")
-
-        st.write("Status Code:", response.status_code)
-
-        st.subheader("Raw Server Response")
-
-        st.code(response.text)
-
-        # --------------------------------------------------
+        # ==================================================
         # SUCCESS RESPONSE
-        # --------------------------------------------------
+        # ==================================================
 
         if response.status_code == 200:
 
-            try:
+            result = response.json()
 
-                result = response.json()
+            prediction = result.get("prediction", "Unknown")
+            confidence = result.get("confidence", 0)
 
-                prediction = result.get("prediction", "Unknown")
-                confidence = result.get("confidence", 0)
+            if prediction.lower() == "low risk":
 
-                st.subheader("Prediction Result")
+                st.markdown(f"""
+                <div class="result-box low-risk">
+                    ✅ LOW FINANCIAL RISK <br><br>
+                    Confidence: {confidence}%
+                </div>
+                """, unsafe_allow_html=True)
 
-                if prediction.lower() == "low risk":
+            else:
 
-                    st.markdown(f"""
-                    <div class="result-box low-risk">
-                        ✅ LOW FINANCIAL RISK <br><br>
-                        Confidence: {confidence}%
-                    </div>
-                    """, unsafe_allow_html=True)
+                st.markdown(f"""
+                <div class="result-box high-risk">
+                    ⚠️ HIGH FINANCIAL RISK <br><br>
+                    Confidence: {confidence}%
+                </div>
+                """, unsafe_allow_html=True)
 
-                else:
-
-                    st.markdown(f"""
-                    <div class="result-box high-risk">
-                        ⚠️ HIGH FINANCIAL RISK <br><br>
-                        Confidence: {confidence}%
-                    </div>
-                    """, unsafe_allow_html=True)
-
-            except Exception as json_error:
-
-                st.error("JSON Decode Error")
-
-                st.write(json_error)
-
-        # --------------------------------------------------
+        # ==================================================
         # SERVER ERROR
-        # --------------------------------------------------
+        # ==================================================
 
         else:
 
             st.error(f"Server Error: {response.status_code}")
 
-    # --------------------------------------------------
+            st.write(response.text)
+
+    # ==================================================
     # TIMEOUT ERROR
-    # --------------------------------------------------
+    # ==================================================
 
     except requests.exceptions.Timeout:
 
         st.error("Request Timeout. Render backend may be sleeping.")
 
-    # --------------------------------------------------
+    # ==================================================
     # CONNECTION ERROR
-    # --------------------------------------------------
+    # ==================================================
 
     except requests.exceptions.ConnectionError:
 
         st.error("Failed to connect to backend server.")
 
-    # --------------------------------------------------
+    # ==================================================
     # OTHER ERRORS
-    # --------------------------------------------------
+    # ==================================================
 
     except Exception as e:
 
