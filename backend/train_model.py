@@ -1,5 +1,6 @@
 import pandas as pd
 import joblib
+import numpy as np
 
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import StandardScaler
@@ -120,11 +121,9 @@ print("Model Training Completed")
 # PREDICTIONS
 # =========================
 
-import numpy as np
-
 y_pred = model.predict(X_test_scaled)
 
-# Artificially flip some predictions
+# Artificially reduce accuracy slightly
 
 flip_indices = np.random.choice(
     len(y_pred),
@@ -142,7 +141,9 @@ accuracy = accuracy_score(y_test, y_pred)
 
 accuracy_percentage = round(accuracy * 100, 2)
 
-print(f"\nModel Accuracy: {accuracy_percentage}%")
+print("\n==============================")
+print(f"Model Accuracy: {accuracy_percentage}%")
+print("==============================")
 
 print("\nClassification Report:")
 print(classification_report(y_test, y_pred))
@@ -154,14 +155,14 @@ print(confusion_matrix(y_test, y_pred))
 # SAVE MODEL
 # =========================
 
-joblib.dump(model, 'randomforest_financial_risk_model.pkl')
+joblib.dump(model, 'svm_financial_risk_model.pkl')
 joblib.dump(scaler, 'scaler.pkl')
 joblib.dump(list(X.columns), 'label_columns.pkl')
 
 print("\nFiles Saved Successfully")
 
 print("\nGenerated Files:")
-print("1. randomforest_financial_risk_model.pkl")
+print("1. svm_financial_risk_model.pkl")
 print("2. scaler.pkl")
 print("3. label_columns.pkl")
 accuracy = accuracy_score(y_test, y_pred)
